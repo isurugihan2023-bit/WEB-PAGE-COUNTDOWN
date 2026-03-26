@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>138 DAY COMEBACK | Mission Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="gaming-theme">
+    <div class="overlay"></div>
+    <main class="container">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-left">
+                <h1 class="glow-text">EXAM <span class="accent-text">BOOST</span></h1>
+
+            </div>
+
+            <div class="header-center">
+                <div class="detailed-countdown">
+                    <div class="countdown-unit">
+                        <span id="cd-days">--</span>
+                        <span class="unit-label">DAYS</span>
+                    </div>
+                    <div class="countdown-sep">:</div>
+                    <div class="countdown-unit">
+                        <span id="cd-hours">--</span>
+                        <span class="unit-label">HRS</span>
+                    </div>
+                    <div class="countdown-sep">:</div>
+                    <div class="countdown-unit">
+                        <span id="cd-mins">--</span>
+                        <span class="unit-label">MIN</span>
+                    </div>
+                    <div class="countdown-sep">:</div>
+                    <div class="countdown-unit">
+                        <span id="cd-secs">--</span>
+                        <span class="unit-label">SEC</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <div id="live-time">00:00:00 PM</div>
+                <div id="live-date">Monday, 01 Jan 2024</div>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <!-- LEFT: ACTIVE MISSION -->
+            <section class="mission-hub glass-card">
+                <h2 class="section-title"><span class="icon">🎯</span> ACTIVE MISSION</h2>
+                <div id="active-mission-card" class="mission-card active">
+                    <div class="mission-info">
+                        <h3 id="current-subject">Loading...</h3>
+                        <p id="current-task">Wait for next session</p>
+                    </div>
+                    <div class="mission-timer">
+                        <div id="timer-display">--:--:--</div>
+                        <div class="timer-sub">REMAINING</div>
+                    </div>
+                    <div class="mission-actions">
+                        <button id="btn-start" class="btn btn-primary glow-btn">START MISSION</button>
+                        <button id="btn-stop" class="btn btn-danger">STOP MISSION</button>
+                    </div>
+                </div>
+                
+                <div class="header-stats-compact">
+                    <div class="progress-bar-container">
+                        <div id="daily-progress" class="progress-bar" style="width: 0%;"></div>
+                    </div>
+                    <div class="compact-vals">
+                        <span id="starter-mode-status">STARTER</span> | 
+                        <span id="deadline-days">--- DAYS LEFT</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CENTER: TIMETABLE -->
+            <section class="timetable glass-card">
+                <div class="section-header">
+                    <h2 class="section-title"><span class="icon">📅</span> DAILY TIMETABLE</h2>
+                    <button class="reset-btn" onclick="resetDay()">PREPARE NEXT DAY</button>
+                </div>
+                <div id="timetable-list" class="timetable-grid">
+                    <!-- Dynamic session cards injected here -->
+                </div>
+            </section>
+
+            <!-- RIGHT: SIDEBAR -->
+            <aside class="sidebar">
+                <div id="penalty-panel" class="glass-card panel penalty-panel">
+                    <div class="panel-header" onclick="togglePenaltyList()">
+                        <h2 class="section-title red-accent"><span class="icon">⚡</span> PENALTY LIST</h2>
+                        <span id="penalty-arrow" class="toggle-arrow">▲</span>
+                    </div>
+                    <div id="penalty-content" class="collapsible-content">
+                        <ul id="penalty-list" class="list-items">
+                            <li class="empty-msg">No penalties yet.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="glass-card panel reward-panel">
+                    <h2 class="section-title gold-accent"><span class="icon">🎁</span> REWARDS</h2>
+                    <div id="rewards-container" class="rewards-grid">
+                        <div class="reward-item locked" title="Complete all missions to watch YouTube" onclick="claimReward('netflix')">
+                            <span class="reward-icon">🎬</span>
+                        </div>
+                        <div class="reward-item locked" title="Complete 3 missions">
+                            <span class="reward-icon">🎮</span>
+                        </div>
+                        <div class="reward-item locked" title="Complete All missions" onclick="claimReward('freetime')">
+                            <span class="reward-icon">🧊</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- REWARD MODAL: FREE TIME -->
+        <div id="reward-modal" class="modal-overlay hidden">
+            <div class="modal-content glass-card">
+                <div class="modal-header">
+                    <h2 class="glow-text">FREE TIME</h2>
+                    <button class="close-modal" onclick="closeRewardModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="reward-timer-container">
+                        <div id="reward-countdown">02:00:00</div>
+                        <button class="btn btn-reset-reward" onclick="resetFreeTime()">RESET</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER: RELAX ACTIONS -->
+        <footer class="footer glass-card">
+            <div class="relax-grid">
+                <button class="relax-btn" onclick="startRelax('Walk 🚶', 600)">Walk</button>
+                <button class="relax-btn" onclick="startRelax('Hydrate 💧', 180)">Hydrate</button>
+                <button class="relax-btn" onclick="startRelax('Music 🎧', 240)">Music</button>
+                <button class="relax-btn" onclick="startRelax('Meditate 😌', 180)">Meditate</button>
+            </div>
+            <div id="relax-timer-overlay" class="hidden">
+                <div class="relax-timer-card">
+                    <h3 id="relax-task-name">Walking...</h3>
+                    <div id="relax-countdown">00:00</div>
+                    <button class="btn btn-secondary" onclick="stopRelax()">SKIP</button>
+                </div>
+            </div>
+        </footer>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
