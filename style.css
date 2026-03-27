@@ -66,6 +66,30 @@ body {
 .header-left {
     display: flex;
     flex-direction: column;
+    gap: 10px;
+}
+
+.history-trigger {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.history-trigger:hover {
+    background: rgba(255, 70, 85, 0.1);
+    border-color: rgba(255, 70, 85, 0.4);
+    color: var(--accent-red);
 }
 
 .glow-text {
@@ -786,6 +810,122 @@ body {
     text-shadow: 0 0 20px rgba(255, 70, 85, 0.4);
     letter-spacing: 4px;
     margin-bottom: 0.5rem;
+}
+
+/* HISTORY MODAL STYLES */
+.history-modal-content {
+    max-width: 700px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    padding-top: 2rem;
+}
+
+.history-body {
+    overflow-y: auto;
+    padding-right: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.history-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.history-item:hover {
+    background: rgba(255, 70, 85, 0.05);
+    border-color: rgba(255, 70, 85, 0.2);
+    transform: translateX(5px);
+}
+
+.history-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.history-day-tag {
+    font-family: 'Orbitron', sans-serif;
+    color: var(--accent-red);
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+.history-date {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.history-progress-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.history-mini-progress-container {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    margin: 10px 0;
+    overflow: hidden;
+}
+
+.history-mini-progress {
+    height: 100%;
+    background: var(--accent-red);
+    box-shadow: 0 0 10px var(--accent-red);
+}
+
+.history-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.status-pill {
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: 100px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+}
+
+.status-pill.done {
+    background: rgba(40, 167, 69, 0.1);
+    border-color: rgba(40, 167, 69, 0.3);
+    color: #28a745;
+}
+
+.status-pill.fail {
+    background: rgba(255, 70, 85, 0.1);
+    border-color: rgba(255, 70, 85, 0.3);
+    color: var(--accent-red);
+}
+
+.empty-history {
+    padding: 3rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    font-size: 1.1rem;
+}
+
+.history-stats-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 5px;
 }
 
 .notification-toggle {

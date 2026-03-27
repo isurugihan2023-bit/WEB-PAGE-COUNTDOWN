@@ -20,6 +20,9 @@
         <header class="header">
             <div class="header-left">
                 <h1 class="glow-text">EXAM <span class="accent-text">BOOST</span></h1>
+                <button id="btn-history" class="history-trigger" onclick="openHistoryModal()">
+                    <span class="icon">📜</span> HISTORY
+                </button>
 
             </div>
 
@@ -123,6 +126,20 @@
                     </div>
                 </div>
             </aside>
+        </div>
+
+        <!-- HISTORY MODAL -->
+        <div id="history-modal" class="modal-overlay hidden">
+            <div class="modal-content glass-card history-modal-content">
+                <div class="modal-header">
+                    <h2 class="glow-text"><span class="icon">📜</span> MISSION HISTORY</h2>
+                    <button class="close-modal" onclick="closeHistoryModal()">&times;</button>
+                </div>
+                <div id="history-list" class="modal-body history-body">
+                    <!-- History entries injected here -->
+                    <div class="empty-history">No history recorded yet. Complete a day to see your progress here!</div>
+                </div>
+            </div>
         </div>
 
         <!-- REWARD MODAL: FREE TIME -->

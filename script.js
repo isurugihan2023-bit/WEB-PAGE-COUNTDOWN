@@ -322,7 +322,8 @@ let state = {
     freeTimeEnd: null, // Timestamp when reward ends
     lastNotifiedId: null, // ID of session already notified
     lastWarningId: null,  // ID of session warning already sent
-    lastEndNotifiedId: null // ID of session end already notified
+    lastEndNotifiedId: null, // ID of session end already notified
+    history: [] // [{ day, date, results, progress, completedCount, totalCount }]
 };
 
 // Initialize app
@@ -411,6 +412,9 @@ function checkDayProgression() {
             }
         });
 
+        // Record History before changing state
+        recordHistory();
+
         state.day += 1;
         state.sessionResults = {};
     }
@@ -418,8 +422,55 @@ function checkDayProgression() {
     saveState();
 }
 
+/**
+ * Capture current day's performance and save it to history before resetting.
+ */
+function recordHistory() {
+    const activeSessions = getActiveSessionsForDay(state.day);
+    const results = { ...state.sessionResults };
+    const date = new Date().toLocaleDateString('en-US', { 
+        weekday: 'short', 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+    });
+
+    const activeCount = activeSessions.length;
+    const completedCount = Object.keys(state.sessionResults).filter(id => 
+        state.sessionResults[id] === 'done' && activeSessions.some(s => s.id === id)
+    ).length;
+    const progress = activeCount > 0 ? Math.round((completedCount / activeCount) * 100) : 0;
+
+    // Create a detailed record
+    const record = {
+        day: state.day,
+        date: date,
+        results: results,
+        progress: progress,
+        completedCount: completedCount,
+        totalCount: activeCount,
+        timestamp: new Date().getTime()
+    };
+
+    // Add to history (limit to last 30 entries if needed, but for now just push)
+    if (!state.history) state.history = [];
+    
+    // Check if day already exists (to avoid duplicate entries if reset is clicked multiple times)
+    const existingIndex = state.history.findIndex(h => h.day === state.day);
+    if (existingIndex !== -1) {
+        state.history[existingIndex] = record;
+    } else {
+        state.history.unshift(record); // newest first
+    }
+    
+    saveState();
+}
+
 function resetDay() {
     if (confirm("Are you sure you want to finish today and prepare for the next day? Unfinished tasks will be added to penalties.")) {
+        // Record History before changing state
+        recordHistory();
+
         // Move uncompleted tasks to penalties
         const activeSessions = getActiveSessionsForDay(state.day);
         activeSessions.forEach(s => {
@@ -935,6 +986,69 @@ function togglePenaltyList() {
 function showNotification(msg, type = "success") {
     const icon = type === "error" ? "❌" : "🏆";
     notifier.notify(type === "error" ? "SYSTEM ALERT" : "MISSION STATUS", msg, icon);
+}
+
+// History Controls
+function openHistoryModal() {
+    renderHistory();
+    document.getElementById('history-modal').classList.remove('hidden');
+}
+
+function closeHistoryModal() {
+    document.getElementById('history-modal').classList.add('hidden');
+}
+
+function renderHistory() {
+    const list = document.getElementById('history-list');
+    if (!list) return;
+
+    if (!state.history || state.history.length === 0) {
+        list.innerHTML = '<div class="empty-history">No history recorded yet. Complete a day to see your progress here!</div>';
+        return;
+    }
+
+    list.innerHTML = '';
+    state.history.forEach(record => {
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        
+        // Count statuses
+        const results = record.results || {};
+        const doneCount = Object.values(results).filter(v => v === 'done').length;
+        const failCount = Object.values(results).filter(v => v === 'fail').length;
+
+        // Generate status pills
+        let pillsHtml = '';
+        SESSIONS.forEach(s => {
+            const res = results[s.id];
+            if (res) {
+                pillsHtml += `<span class="status-pill ${res}">${s.name}</span>`;
+            }
+        });
+
+        item.innerHTML = `
+            <div class="history-item-header">
+                <div>
+                    <div class="history-day-tag">DAY ${record.day}</div>
+                    <div class="history-date">${record.date}</div>
+                </div>
+                <div style="text-align: right">
+                    <div class="history-progress-label">${record.progress}%</div>
+                </div>
+            </div>
+            <div class="history-mini-progress-container">
+                <div class="history-mini-progress" style="width: ${record.progress}%"></div>
+            </div>
+            <div class="history-stats-row">
+                <span>Completed: ${record.completedCount}/${record.totalCount}</span>
+                <span>Fails: ${failCount}</span>
+            </div>
+            <div class="history-details">
+                ${pillsHtml || '<small style="opacity: 0.5">No session data available</small>'}
+            </div>
+        `;
+        list.appendChild(item);
+    });
 }
 
 // Start
