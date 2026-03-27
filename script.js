@@ -212,6 +212,83 @@ class ShapeGrid {
 const confettiEffect = new Confetti();
 function fireCelebration() { confettiEffect.fire(); }
 
+class NotificationManager {
+    constructor() {
+        this.container = document.getElementById('toast-container');
+        this.toggleBtn = document.getElementById('notification-toggle');
+        this.alarmSound = document.getElementById('alarm-sound');
+        this.permission = Notification.permission;
+        
+        this.setupEventListeners();
+        this.updateToggleButton();
+    }
+
+    setupEventListeners() {
+        this.toggleBtn?.addEventListener('click', () => this.requestPermission());
+    }
+
+    async requestPermission() {
+        const permission = await Notification.requestPermission();
+        this.permission = permission;
+        this.updateToggleButton();
+        if (permission === 'granted') {
+            this.toast('SYSTEM', 'Notifications enabled! Mission alerts active.', '🔔');
+        } else if (permission === 'denied') {
+            this.toast('SYSTEM', 'Notifications blocked. Please enable in browser settings.', '❌');
+        }
+    }
+
+    updateToggleButton() {
+        if (!this.toggleBtn) return;
+        if (this.permission === 'granted') {
+            this.toggleBtn.classList.add('enabled');
+            this.toggleBtn.title = 'Notifications Enabled';
+        } else {
+            this.toggleBtn.classList.remove('enabled');
+            this.toggleBtn.title = 'Enable Notifications';
+        }
+    }
+
+    toast(title, msg, icon = '🛡️', duration = 5000) {
+        if (!this.container) return;
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `
+            <div class="toast-icon">${icon}</div>
+            <div class="toast-content">
+                <div class="toast-title">${title}</div>
+                <div class="toast-msg">${msg}</div>
+            </div>
+        `;
+        
+        this.container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('removing');
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    }
+
+    playAlarm() {
+        if (this.alarmSound) {
+            this.alarmSound.currentTime = 0;
+            this.alarmSound.play().catch(e => console.log('Audio playback blocked:', e));
+        }
+    }
+
+    notify(title, msg, icon = '🎯') {
+        this.toast(title, msg, icon);
+        if (this.permission === 'granted') {
+            try {
+                new Notification(title, { body: msg });
+            } catch (e) { console.error(e); }
+        }
+        this.playAlarm();
+    }
+}
+
+const notifier = new NotificationManager();
+
 const SESSIONS = [
     { id: 'morning', name: 'Information Technology', timeRange: [6.5, 9.0], task: 'Learn 1 topic + 5-10 questions', color: '#00f2ff' },
     { id: 'late_morning', name: 'Engineering Technology', timeRange: [10.0, 12.5], task: 'Learn concept + Examples/diagrams', color: '#00f2ff' },
@@ -233,7 +310,9 @@ let state = {
     remainingSeconds: 0,
     currentSessionId: null,
     celebratedToday: false,
-    freeTimeEnd: null // Timestamp when reward ends
+    freeTimeEnd: null, // Timestamp when reward ends
+    lastNotifiedId: null, // ID of session already notified
+    lastWarningId: null  // ID of session warning already sent
 };
 
 // Initialize app
@@ -246,6 +325,11 @@ function init() {
     updateClock(); // Initial call
     new ClickSpark(); // Interactive particle effect
     new ShapeGrid(); // Animated background grid
+    
+    // Check if notification permission was already granted
+    if (Notification.permission === 'granted') {
+        notifier.updateToggleButton();
+    }
 }
 
 function updateClock() {
@@ -750,8 +834,39 @@ function startIntervals() {
             checkDayProgression();
             updateDashboard();
             renderTimetable();
+            checkSessionTransitions();
         }
     }, 1000);
+}
+
+function checkSessionTransitions() {
+    const now = new Date();
+    const decHour = now.getHours() + now.getMinutes() / 60;
+    const activeForDay = getActiveSessionsForDay(state.day);
+    
+    // Check for "Starts in 1 minute" warning
+    const upcomingSession = activeForDay.find(s => {
+        const timeToStart = (s.timeRange[0] - decHour) * 60;
+        return timeToStart > 0 && timeToStart <= 1.1; // 1 minute window
+    });
+
+    if (upcomingSession && state.lastWarningId !== upcomingSession.id) {
+        state.lastWarningId = upcomingSession.id;
+        notifier.notify("INCOMING MISSION", `${upcomingSession.name} starts in 1 minute!`, "⏳");
+        saveState();
+    }
+
+    // Check for "Started" notification
+    const currentSession = activeForDay.find(s => decHour >= s.timeRange[0] && decHour <= s.timeRange[1]);
+    if (currentSession && state.lastNotifiedId !== currentSession.id) {
+        state.lastNotifiedId = currentSession.id;
+        notifier.notify("MISSION STARTED", `Time to focus on ${currentSession.name}!`, "🔥");
+        saveState();
+    }
+    
+    // Reset notification trackers if no session is active or upcoming
+    if (!currentSession) state.lastNotifiedId = null;
+    if (!upcomingSession) state.lastWarningId = null;
 }
 
 // Relax Logic
@@ -790,8 +905,8 @@ function togglePenaltyList() {
 }
 
 function showNotification(msg, type = "success") {
-    // Simple alert for now, could be premium toast
-    alert(msg);
+    const icon = type === "error" ? "❌" : "🏆";
+    notifier.notify(type === "error" ? "SYSTEM ALERT" : "MISSION STATUS", msg, icon);
 }
 
 // Start
