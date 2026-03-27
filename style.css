@@ -308,8 +308,11 @@ body {
 }
 
 .session-row.active {
-    background: rgba(255, 70, 85, 0.1);
-    border-left-color: var(--accent-cyan);
+    background: rgba(255, 70, 85, 0.15);
+    border-left: 4px solid var(--accent-cyan);
+    box-shadow: inset 5px 0 15px rgba(255, 70, 85, 0.1);
+    transform: scale(1.02);
+    z-index: 1;
 }
 
 .session-row.completed {
@@ -783,6 +786,51 @@ body {
     text-shadow: 0 0 20px rgba(255, 70, 85, 0.4);
     letter-spacing: 4px;
     margin-bottom: 0.5rem;
+}
+
+.notification-toggle {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(15, 15, 15, 0.8);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.notification-toggle:hover {
+    transform: scale(1.1);
+    border-color: var(--accent-red);
+}
+
+.notification-toggle.enabled {
+    color: var(--accent-gold);
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 20px rgba(255, 204, 0, 0.3);
+}
+
+.notification-toggle.enabled .icon {
+    animation: ring 2s ease infinite;
+}
+
+@keyframes ring {
+    0% { transform: rotate(0); }
+    10% { transform: rotate(15deg); }
+    20% { transform: rotate(-15deg); }
+    30% { transform: rotate(10deg); }
+    40% { transform: rotate(-10deg); }
+    50% { transform: rotate(0); }
+    100% { transform: rotate(0); }
 }
 
 .timer-label {

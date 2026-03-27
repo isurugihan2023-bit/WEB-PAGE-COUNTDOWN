@@ -285,6 +285,15 @@ class NotificationManager {
         }
         this.playAlarm();
     }
+
+    sessionAlert(type, sessionName) {
+        const title = type === 'start' ? 'MISSION STARTING' : 'MISSION ENDING';
+        const msg = type === 'start' 
+            ? `Time to focus on ${sessionName}! Unit ready.` 
+            : `Wrap up ${sessionName}. Next session approaching soon.`;
+        const icon = type === 'start' ? '⚔️' : '🏁';
+        this.notify(title, msg, icon);
+    }
 }
 
 const notifier = new NotificationManager();
@@ -312,7 +321,8 @@ let state = {
     celebratedToday: false,
     freeTimeEnd: null, // Timestamp when reward ends
     lastNotifiedId: null, // ID of session already notified
-    lastWarningId: null  // ID of session warning already sent
+    lastWarningId: null,  // ID of session warning already sent
+    lastEndNotifiedId: null // ID of session end already notified
 };
 
 // Initialize app
@@ -829,44 +839,62 @@ function startIntervals() {
             display.innerText = "--:--:--";
         }
         
+        // Every second checks
+        checkSessionTransitions();
+
         // Auto-refresh UI every minute
         if (new Date().getSeconds() === 0) {
             checkDayProgression();
             updateDashboard();
             renderTimetable();
-            checkSessionTransitions();
         }
     }, 1000);
 }
 
 function checkSessionTransitions() {
     const now = new Date();
-    const decHour = now.getHours() + now.getMinutes() / 60;
+    const decHour = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
     const activeForDay = getActiveSessionsForDay(state.day);
     
-    // Check for "Starts in 1 minute" warning
+    // 1. Upcoming Mission Warning (1 minute before)
     const upcomingSession = activeForDay.find(s => {
         const timeToStart = (s.timeRange[0] - decHour) * 60;
-        return timeToStart > 0 && timeToStart <= 1.1; // 1 minute window
+        return timeToStart > 0 && timeToStart <= 1.0; 
     });
 
     if (upcomingSession && state.lastWarningId !== upcomingSession.id) {
         state.lastWarningId = upcomingSession.id;
-        notifier.notify("INCOMING MISSION", `${upcomingSession.name} starts in 1 minute!`, "⏳");
+        notifier.sessionAlert('start', upcomingSession.name);
         saveState();
     }
 
-    // Check for "Started" notification
+    // 2. Mission Started Notification
     const currentSession = activeForDay.find(s => decHour >= s.timeRange[0] && decHour <= s.timeRange[1]);
     if (currentSession && state.lastNotifiedId !== currentSession.id) {
         state.lastNotifiedId = currentSession.id;
-        notifier.notify("MISSION STARTED", `Time to focus on ${currentSession.name}!`, "🔥");
+        notifier.notify("MISSION ACTIVE", `Focus session: ${currentSession.name} is now live.`, "🔥");
         saveState();
     }
     
-    // Reset notification trackers if no session is active or upcoming
-    if (!currentSession) state.lastNotifiedId = null;
+    // 3. Mission Ending Soon (5 minutes before)
+    if (currentSession) {
+        const timeToEnd = (currentSession.timeRange[1] - decHour) * 60;
+        if (timeToEnd > 0 && timeToEnd <= 5.0 && state.lastEndNotifiedId !== currentSession.id) {
+            state.lastEndNotifiedId = currentSession.id;
+            notifier.sessionAlert('end', currentSession.name);
+            saveState();
+        }
+    }
+
+    // Reset trackers logic
+    // If we are no longer in the "warning" window for the upcoming session
     if (!upcomingSession) state.lastWarningId = null;
+    
+    // If we are no longer in the current session, reset current/end trackers
+    if (!currentSession) {
+        state.lastNotifiedId = null;
+        state.lastEndNotifiedId = null;
+    }
 }
 
 // Relax Logic
