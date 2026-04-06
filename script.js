@@ -1,7 +1,7 @@
 // Interactive Effects Classes
 class ClickSpark {
     constructor(options = {}) {
-        this.sparkColor = options.sparkColor || '#ff4655';
+        this.sparkColor = options.sparkColor || '#ff2a5f';
         this.sparkSize = options.sparkSize || 10;
         this.sparkRadius = options.sparkRadius || 15;
         this.sparkCount = options.sparkCount || 8;

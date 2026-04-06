@@ -1,14 +1,15 @@
 :root {
-    --bg-dark: #000000;
-    --card-bg: rgba(15, 15, 15, 0.9);
-    --accent-red: #ff4655;
-    --accent-cyan: #ff4655;
-    --accent-gold: #ffcc00;
-    --text-primary: #ffffff;
-    --text-secondary: #aaaaaa;
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glow-red: 0 0 8px rgba(255, 70, 85, 0.4);
-    --glow-cyan: 0 0 8px rgba(255, 70, 85, 0.4);
+    --bg-dark: #070709;
+    --card-bg: rgba(18, 18, 24, 0.5);
+    --accent-red: #ff2a5f;
+    --accent-cyan: #00d2ff;
+    --accent-gold: #fbbf24;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --glass-border: rgba(255, 255, 255, 0.05);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    --glow-red: 0 0 15px rgba(255, 42, 95, 0.4);
+    --glow-cyan: 0 0 15px rgba(0, 210, 255, 0.4);
 }
 
 * {
@@ -18,15 +19,15 @@
 }
 
 body {
-    font-family: 'Rajdhani', sans-serif;
-    background-color: transparent;
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-dark);
     color: var(--text-primary);
     overflow-x: hidden;
     min-height: 100vh;
 }
 
 .gaming-theme {
-    background: radial-gradient(circle at center, #1a0a0a 0%, #000000 100%);
+    background: transparent;
 }
 
 .overlay {
@@ -35,10 +36,45 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
-    opacity: 0.1;
+    background: radial-gradient(circle at 15% 50%, rgba(255, 42, 95, 0.08), transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(0, 210, 255, 0.08), transparent 50%);
+    opacity: 1;
     pointer-events: none;
     z-index: -1;
+}
+
+.ambient-glow {
+    position: fixed;
+    filter: blur(140px);
+    opacity: 0.3;
+    z-index: -2;
+    pointer-events: none;
+    border-radius: 50%;
+}
+.ambient-glow.glow-1 {
+    top: -10%;
+    left: -10%;
+    width: 50vw;
+    height: 50vw;
+    background: var(--accent-red);
+    animation: drift1 20s ease-in-out infinite alternate;
+}
+.ambient-glow.glow-2 {
+    bottom: -10%;
+    right: -10%;
+    width: 60vw;
+    height: 60vw;
+    background: var(--accent-cyan);
+    animation: drift2 25s ease-in-out infinite alternate;
+}
+
+@keyframes drift1 {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(10vw, 5vh); }
+}
+@keyframes drift2 {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(-10vw, -5vh); }
 }
 
 .container {
@@ -59,8 +95,10 @@ body {
     padding: 1rem 2rem;
     background: var(--card-bg);
     border: 1px solid var(--glass-border);
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: var(--glass-shadow);
 }
 
 .header-left {
@@ -207,14 +245,17 @@ body {
 .glass-card {
     background: var(--card-bg);
     border: 1px solid var(--glass-border);
-    border-radius: 15px;
+    border-radius: 16px;
     padding: 1.5rem;
-    backdrop-filter: blur(15px);
-    transition: transform 0.3s ease, border-color 0.3s ease;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: var(--glass-shadow);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .glass-card:hover {
-    border-color: rgba(255, 70, 85, 0.3);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.5);
 }
 
 .section-title {
@@ -663,18 +704,18 @@ body {
     cursor: pointer;
     font-weight: bold;
     text-transform: uppercase;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glow-btn {
-    background: #00ff88;
+    background: #00d2ff;
     color: var(--bg-dark);
-    box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
 }
 
 .glow-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 25px #00ff88;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 0 30px #00d2ff, 0 0 60px rgba(0, 210, 255, 0.2);
 }
 
 .btn-danger {
@@ -686,6 +727,8 @@ body {
 .btn-danger:hover {
     background: var(--accent-red);
     color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(255, 42, 95, 0.3);
 }
 
 .hidden { display: none !important; }
